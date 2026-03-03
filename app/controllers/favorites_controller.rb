@@ -1,5 +1,6 @@
 class FavoritesController < ApplicationController
   before_action :set_book
+  before_action :set_time_range
 
   def create
     @book = Book.find(params[:book_id])
@@ -24,5 +25,10 @@ class FavoritesController < ApplicationController
 
   def set_book
     @book = Book.find(params[:book_id])
+  end
+
+  def set_time_range
+    @to = Time.current.at_end_of_day
+    @from = 6.days.ago.at_beginning_of_day
   end
 end

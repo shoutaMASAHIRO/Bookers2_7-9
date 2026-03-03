@@ -14,40 +14,63 @@
 
   <body class="d-flex flex-column vh-100">
     <header class="shadow-sm">
-      <nav class="navbar navbar-expand-lg navbar-dark bg-dark text-white">
+      <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom py-0">
         <div class="container">
-          <a class="navbar-brand p-3" href="/">Bookers</a>
-          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+          <%= link_to '/', class: "navbar-brand py-2 d-flex align-items-center" do %>
+            <i class="fas fa-book-open mr-2" style="font-size: 1.5rem; color: #1d9bf0;"></i>
+            <span class="font-weight-bold" style="color: #0f1419;">Bookers</span>
+          <% end %>
+          <button class="navbar-toggler border-0" type="button" data-toggle="collapse" data-target="#navbarNavDropdown">
             <span class="navbar-toggler-icon"></span>
           </button>
           <div class="collapse navbar-collapse" id="navbarNavDropdown">
             <ul class="navbar-nav ml-auto">
               <% if user_signed_in? %>
                 <li class="nav-item">
-                  <i class="fas fa-home"></i><%= link_to 'Home', user_path(current_user.id) %>
+                  <%= link_to user_path(current_user.id), class: "nav-link d-flex align-items-center" do %>
+                    <i class="fas fa-home fa-lg mr-2"></i> <span class="d-lg-none d-xl-inline">Home</span>
+                  <% end %>
                 </li>
                 <li class="nav-item">
-                  <i class="fas fa-users"></i>
-                  <%= link_to ' Users ', users_path, data: { reload_after: true } %>
+                  <%= link_to users_path, class: "nav-link d-flex align-items-center", data: { reload_after: true } do %>
+                    <i class="fas fa-users fa-lg mr-2"></i> <span class="d-lg-none d-xl-inline">Users</span>
+                  <% end %>
                 </li>
                 <li class="nav-item">
-                  <i class="fas fa-book-open"></i><%= link_to ' Books ', books_path %>
+                  <%= link_to books_path, class: "nav-link d-flex align-items-center" do %>
+                    <i class="fas fa-book fa-lg mr-2"></i> <span class="d-lg-none d-xl-inline">Books</span>
+                  <% end %>
                 </li>
                 <li class="nav-item">
-                  <i class="fas fa-sign-out-alt"></i><%= link_to " Log out ", destroy_user_session_path, method: :delete %>
+                  <%= link_to groups_path, class: "nav-link d-flex align-items-center" do %>
+                    <i class="fas fa-layer-group fa-lg mr-2"></i> <span class="d-lg-none d-xl-inline">Groups</span>
+                  <% end %>
+                </li>
+                <li class="nav-item">
+                  <%= link_to destroy_user_session_path, method: :delete, class: "nav-link d-flex align-items-center text-danger" do %>
+                    <i class="fas fa-sign-out-alt fa-lg mr-2"></i> <span class="d-lg-none d-xl-inline">Logout</span>
+                  <% end %>
                 </li>
               <% else %>
                 <li class="nav-item">
-                  <i class="fas fa-home"></i><%= link_to 'Home', root_path %>
+                  <%= link_to root_path, class: "nav-link d-flex align-items-center" do %>
+                    <i class="fas fa-home fa-lg mr-2"></i> Home
+                  <% end %>
                 </li>
                 <li class="nav-item">
-                  <i class="fas fa-link"></i><%= link_to ' About ', about_path %>
+                  <%= link_to about_path, class: "nav-link d-flex align-items-center" do %>
+                    <i class="fas fa-info-circle fa-lg mr-2"></i> About
+                  <% end %>
                 </li>
                 <li class="nav-item">
-                  <i class="fas fa-user-plus"></i><%= link_to " Sign up ", new_user_registration_path %>
+                  <%= link_to new_user_registration_path, class: "nav-link d-flex align-items-center" do %>
+                    <i class="fas fa-user-plus fa-lg mr-2"></i> Sign up
+                  <% end %>
                 </li>
                 <li class="nav-item">
-                  <i class="fas fa-sign-in-alt"></i><%= link_to " Log in ", new_user_session_path %>
+                  <%= link_to new_user_session_path, class: "nav-link d-flex align-items-center font-weight-bold" do %>
+                    <i class="fas fa-sign-in-alt fa-lg mr-2"></i> Login
+                  <% end %>
                 </li>
               <% end %>
             </ul>
@@ -57,7 +80,7 @@
     </header>
 
     <% if user_signed_in? %>
-      <div class="bg-light py-3">
+      <div class="bg-light py-3 border-bottom">
         <div class="container">
           <%= form_with url: search_path, method: :get, local: true, class: "form-inline row g-2 justify-content-center" do %>
             <div class="col-auto">
@@ -72,10 +95,10 @@
               ]), class: "form-select" %>
             </div>
             <div class="col-auto">
-              <%= text_field_tag :word, params[:word], class: "form-control", placeholder: "検索ワード" %>
+              <%= text_field_tag :word, params[:word], class: "form-control", placeholder: "Search Bookers" %>
             </div>
             <div class="col-auto">
-              <%= submit_tag "検索", class: "btn btn-primary" %>
+              <%= submit_tag "Search", class: "btn btn-primary btn-sm px-4" %>
             </div>
           <% end %>
         </div>
@@ -83,8 +106,112 @@
     <% end %>
 
     <main class="mb-auto">
+      <% 
+        # Collect all possible errors and flashes
+        all_errors = []
+        if defined?(resource) && resource.respond_to?(:errors)
+          all_errors += resource.errors.full_messages
+        end
+        [@user, @book, @group].each do |obj|
+          if obj && obj.respond_to?(:errors)
+            all_errors += obj.errors.full_messages
+          end
+        end
+
+        has_status = flash[:notice] || flash[:alert] || flash[:success] || all_errors.any?
+      %>
+
+      <% if has_status %>
+        <!-- Modal for errors/messages -->
+        <div class="modal fade" id="statusModal" tabindex="-1" role="dialog" aria-labelledby="statusModalLabel" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header bg-light">
+                <h5 class="modal-title" id="statusModalLabel">Notification</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <% if flash[:notice] %>
+                  <p class="text-success"><%= flash[:notice] %></p>
+                <% end %>
+                <% if flash[:success] %>
+                  <p class="text-success"><%= flash[:success] %></p>
+                <% end %>
+                <% if flash[:alert] %>
+                  <p class="text-danger"><%= flash[:alert] %></p>
+                <% end %>
+                
+                <% if all_errors.any? %>
+                  <div id="error_explanation">
+                    <h5 class="text-danger"><%= pluralize(all_errors.count, "error") %> prohibited this from being saved:</h5>
+                    <ul class="text-danger">
+                      <% all_errors.each do |message| %>
+                        <li><%= message %></li>
+                      <% end %>
+                    </ul>
+                  </div>
+                <% end %>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <script>
+          $(document).on('turbolinks:load', function() {
+            if ($('#statusModal').length) {
+              $('#statusModal').modal('show');
+            }
+          });
+        </script>
+      <% end %>
+
       <%= yield %>
     </main>
+
+    <% if user_signed_in? %>
+      <div class="mobile-bottom-nav">
+        <%= link_to user_path(current_user), class: "nav-item-mobile #{'active' if current_page?(user_path(current_user))}" do %>
+          <i class="fas fa-user"></i>
+          <span>Profile</span>
+        <% end %>
+        <%= link_to users_path, class: "nav-item-mobile #{'active' if current_page?(users_path)}" do %>
+          <i class="fas fa-users"></i>
+          <span>Users</span>
+        <% end %>
+        <%= link_to books_path, class: "nav-item-mobile #{'active' if current_page?(books_path)}" do %>
+          <i class="fas fa-book"></i>
+          <span>Books</span>
+        <% end %>
+        <%= link_to destroy_user_session_path, method: :delete, class: "nav-item-mobile" do %>
+          <i class="fas fa-sign-out-alt"></i>
+          <span>Logout</span>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="mobile-bottom-nav">
+        <%= link_to root_path, class: "nav-item-mobile #{'active' if current_page?(root_path)}" do %>
+          <i class="fas fa-home"></i>
+          <span>Home</span>
+        <% end %>
+        <%= link_to about_path, class: "nav-item-mobile #{'active' if current_page?(about_path)}" do %>
+          <i class="fas fa-info-circle"></i>
+          <span>About</span>
+        <% end %>
+        <%= link_to new_user_registration_path, class: "nav-item-mobile #{'active' if current_page?(new_user_registration_path)}" do %>
+          <i class="fas fa-user-plus"></i>
+          <span>Join</span>
+        <% end %>
+        <%= link_to new_user_session_path, class: "nav-item-mobile #{'active' if current_page?(new_user_session_path)}" do %>
+          <i class="fas fa-sign-in-alt"></i>
+          <span>Login</span>
+        <% end %>
+      </div>
+    <% end %>
 
     <script>
       document.addEventListener("DOMContentLoaded", function () {

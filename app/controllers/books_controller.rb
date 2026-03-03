@@ -1,14 +1,24 @@
 class BooksController < ApplicationController
   def index
     @book = Book.new
-    @books = Book.all
-    #@users = User.all
-    @user = User.find(current_user.id)
+    @to = Time.current.at_end_of_day
+    @from = 6.days.ago.at_beginning_of_day
+    
+    if params[:latest]
+      @books = Book.all.order(created_at: :desc)
+    elsif params[:star_count]
+      @books = Book.all.order(star: :desc)
+    else
+      @books = Book.includes(:favorites).sort_by { |x| x.favorites.where(created_at: @from..@to).size }.reverse
+    end
+    
+    @user = current_user
   end
 
   def show
     @Bookshow = Book.new
     @book = Book.find(params[:id])
+    @book.increment!(:view_counts)
     @user = User.find(current_user.id)
     @book_comment = BookComment.new
   end
@@ -17,11 +27,13 @@ class BooksController < ApplicationController
     def create
       @book = Book.new(book_params)
       @book.user_id = current_user.id
-      if @book.save!
+      if @book.save
         flash[:success] = "Post was successfully"
         redirect_to book_path(@book.id)
       else
-        @books = Book.all
+        @to = Time.current.at_end_of_day
+        @from = 6.days.ago.at_beginning_of_day
+        @books = Book.includes(:favorites).sort_by { |x| x.favorites.where(created_at: @from..@to).size }.reverse
         @user = User.find(current_user.id)
         render :index
       end
@@ -36,10 +48,8 @@ class BooksController < ApplicationController
 
     def update
       @book = Book.find(params[:id])
-      @book.update(book_params)
-      # flash[:success] = "Edit was successfully"
-      # redirect_to book_path(book.id)  
-      if @book.save!
+      # starは更新させない
+      if @book.update(book_params.except(:star))
         flash[:success] = "Edit was successfully"
         redirect_to book_path(@book.id)
       else
@@ -58,7 +68,7 @@ class BooksController < ApplicationController
   private
 
   def book_params
-    params.require(:book).permit(:title, :body)
+    params.require(:book).permit(:title, :body, :star, :category)
   end
 
 end

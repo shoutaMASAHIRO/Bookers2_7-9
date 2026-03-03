@@ -1,0 +1,22 @@
+<div class="raty-container">
+  <div id="star-display-<%= local_assigns[:book_id] || SecureRandom.hex(8) %>" class="raty-stars"></div>
+  <span class="raty-score-display ml-2" style="color: #536471; font-weight: 800;"><%= star_count %></span>
+</div>
+
+<script>
+  $(document).on('turbolinks:load', function() {
+    let elem = document.querySelector('#star-display-<%= local_assigns[:book_id] || SecureRandom.hex(8) %>');
+    if (elem) {
+      elem.innerHTML = ""
+      let opt = {  
+        starOn: "<%= asset_path('star-on.png') %>",
+        starOff: "<%= asset_path('star-off.png') %>",
+        starHalf: "<%= asset_path('star-half.png') %>",
+        score: <%= star_count %>,
+        readOnly: true,
+        width: false
+      };
+      raty(elem, opt);
+    }
+  });
+</script>

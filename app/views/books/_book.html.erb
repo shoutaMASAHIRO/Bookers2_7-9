@@ -1,52 +1,79 @@
-<h1>User info</h1>
-<table>
-  <tr>
-    <th><%= image_tag user.get_profile_image(100,100) %></th>
-  </tr>
-  <tr>
-    <td>name:</td>
-    <td><%= user.name %></td>
-  </tr>
-  <tr>
-    <td>introduction:</td>
-    <td><%= user.introduction %></td>
-  </tr>
-  <tr>
-    <td>
-    <% if user.id == current_user.id %>
-      <%= link_to edit_user_path(user.id) do %>
-        <i class="fas fa-user-cog"></i>
+<div class="profile-card border p-3 mb-4 rounded">
+  <h2 class="h5 font-weight-bold mb-3 border-0">Profile</h2>
+  <div class="text-center mb-3">
+    <%= image_tag user.get_profile_image(100,100), size: "100x100", class: "rounded-circle border" %>
+  </div>
+  <div class="text-center mb-3">
+    <h3 class="h6 font-weight-bold mb-0 border-0"><%= user.name %></h3>
+    <small class="text-muted">@<%= user.name %></small>
+  </div>
+  <p class="small text-secondary mb-3"><%= user.introduction %></p>
+  
+  <div class="d-flex justify-content-around border-top border-bottom py-2 mb-3">
+    <%= link_to following_user_path(user), class: "text-dark small text-decoration-none" do %>
+      <strong><%= user.following.count %></strong> <span class="text-muted">Following</span>
+    <% end %>
+    <%= link_to followers_user_path(user), class: "text-dark small text-decoration-none" do %>
+      <strong><%= user.followers.count %></strong> <span class="text-muted">Followers</span>
+    <% end %>
+  </div>
+
+  <div class="mb-2">
+    <%= render 'users/follow_button', user: user %>
+    
+    <% if current_user != user && current_user.following?(user) %>
+      <%= link_to rooms_path(user_id: user.id), method: :post, class: "btn btn-outline-info btn-sm btn-block mt-2" do %>
+        <i class="far fa-envelope"></i> Message
       <% end %>
     <% end %>
-    </td>
-  </tr>
+    
+    <% if user.id == current_user.id %>
+      <%= link_to edit_user_path(user.id), class: "btn btn-outline-dark btn-sm btn-block mt-2" do %>
+        <i class="fas fa-user-cog"></i> Edit Profile
+      <% end %>
+    <% end %>
+  </div>
+</div>
 
-</table>
-<p>
-  <%= link_to "Following: #{user.following.count}", following_user_path(user), class: "btn btn-outline-primary btn-sm d-block my-1" %>
-  <%= link_to "Followers: #{user.followers.count}", followers_user_path(user), class: "btn btn-outline-primary btn-sm d-block my-1" %>
-  <%= render 'users/follow_button', user: @user %>
-</p>
+<div class="post-form-card border p-3 rounded">
+  <h2 class="h5 font-weight-bold mb-3 border-0">New Book</h2>
+  <%= form_with model: book, url: '/books', method: :post do |f| %>
+    <div class="form-group mb-2">
+      <%= f.text_field :title, class: "form-control bg-light border-0", placeholder: "Title" %>
+    </div>
+    
+    <div class="form-group mb-2">
+      <%= f.text_area :body, class: "form-control bg-light border-0", placeholder: "What's the book about?", rows: 3 %>
+    </div>
 
-<h1>New book</h1>
-<% if book.errors.any? %> 
-	<h3><%= book.errors.count %> errors occurred</h3>
-	<ul>
-    <% book.errors.full_messages.each do |message| %> 
-				<li><%= message %></li>
-		<% end %>
-	</ul>
-<% end %>
+    <div class="form-group mb-2">
+      <%= f.text_field :category, class: 'form-control bg-light border-0 small', placeholder: "Category (e.g. #novel)" %>
+    </div>
 
-<%= form_with model: book, url: '/books', method: :post do |f| %>
-  
-  <h4>Title</h4>
-  <%= f.text_field :title %>
-  
-  <h4>Body</h4>
-  <%= f.text_area :body %>
+    <div id="star" class="mb-3">
+      <label class="small text-muted mb-1">Rate this book (required):</label>
+      <div id="post_raty"></div>
+      <script>
+        $(document).on('turbolinks:load', function() {
+          let elem = document.querySelector('#post_raty');
+          if (elem) {
+            elem.innerHTML = ""
+            let opt = {  
+              starOn: "<%= asset_path('star-on.png') %>",
+              starOff: "<%= asset_path('star-off.png') %>",
+              starHalf: "<%= asset_path('star-half.png') %>",
+              scoreName: 'book[star]',
+              half: false,
+              width: false
+            };
+            if (typeof Raty !== 'undefined') {
+              new Raty(elem, opt).init();
+            }
+          }
+        });
+      </script>
+    </div>
 
-  <br></br>
-  <%= f.submit 'Create Book' %>
-  
-<% end %>
+    <%= f.submit 'Post', class: 'btn btn-primary btn-block shadow-none' %>
+  <% end %>
+</div>

@@ -1,1 +1,18 @@
 $("#favorite-button-<%= @book.id %>").html("<%= j render('favorites/favorite_button', book: @book) %>");
+
+// 週間いいね数の表示を更新
+$("#weekly-likes-<%= @book.id %>").text("<%= @book.favorites.where(created_at: @from..@to).count %>");
+// カードのデータ属性を更新
+$("#weekly-likes-<%= @book.id %>").closest(".book-card").attr("data-weekly-likes", "<%= @book.favorites.where(created_at: @from..@to).count %>");
+
+// 並び替えの実行
+if ($("#book-list").length) {
+  var $list = $("#book-list");
+  var $cards = $list.find(".book-card");
+  
+  $cards.sort(function(a, b) {
+    var likesA = parseInt($(a).attr("data-weekly-likes"));
+    var likesB = parseInt($(b).attr("data-weekly-likes"));
+    return likesB - likesA; // 降順
+  }).appendTo($list);
+}

@@ -1,12 +1,3 @@
-<% if @user.errors.any? %> 
-  <h3><%= @user.errors.count %> errors occurred</h3>
-  <ul>
-      <% @user.errors.full_messages.each do |message| %> 
-      <li><%= message %></li>
-    <% end %>
-  </ul>
-<% end %>
-
 <h2>Edit user info</h2>
 <%= form_with model: @user, method: :patch do |f| %>
   <label for="Name">Name</label><br>

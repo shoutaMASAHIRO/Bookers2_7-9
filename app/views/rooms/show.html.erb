@@ -1,0 +1,53 @@
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-md-8 offset-md-2">
+      <div class="card mb-4">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+          <% @entries.each do |e| %>
+            <%= image_tag e.user.get_profile_image(40, 40), size: "40x40", class: "rounded-circle mr-2" %>
+            <h5 class="mb-0"><%= e.user.name %></h5>
+          <% end %>
+        </div>
+        <div class="card-body chat-box" style="height: 400px; overflow-y: scroll;">
+          <% if @messages.any? %>
+            <% @messages.each do |message| %>
+              <div class="d-flex <%= message.user == current_user ? 'justify-content-end' : 'justify-content-start' %> mb-2">
+                <div class="<%= message.user == current_user ? 'bg-primary text-white' : 'bg-light text-dark' %> p-2 rounded-lg shadow-sm" style="max-width: 70%;">
+                  <p class="mb-0" style="word-wrap: break-word;"><%= message.content %></p>
+                  <small class="d-block text-right opacity-75" style="font-size: 0.7rem;">
+                    <%= message.created_at.strftime("%H:%M") %>
+                  </small>
+                </div>
+              </div>
+            <% end %>
+          <% else %>
+            <p class="text-center text-muted">No messages yet. Say hello!</p>
+          <% end %>
+        </div>
+        <div class="card-footer bg-white border-top-0">
+          <%= form_with model: @message, local: true do |f| %>
+            <div class="input-group">
+              <%= f.text_field :content, class: "form-control", placeholder: "Message... (max 140 chars)", maxlength: 140 %>
+              <%= f.hidden_field :room_id, value: @room.id %>
+              <div class="input-group-append">
+                <%= f.submit "Send", class: "btn btn-primary" %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+      <div class="text-center">
+        <%= link_to 'Back to Users', users_path, class: "btn btn-link text-muted" %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(document).on('turbolinks:load', function() {
+    var chatBox = document.querySelector('.chat-box');
+    if (chatBox) {
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+  });
+</script>

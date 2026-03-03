@@ -1,0 +1,10 @@
+<div class="p-3 border rounded bg-light">
+  <h5 class="small font-weight-bold text-muted mb-2">Search Result</h5>
+  <div class="h4 font-weight-bold mb-0">
+    <% if search_book.nil? %>
+      <span class="text-muted" style="font-size: 0.9rem;">Please select a date</span>
+    <% else %>
+      <%= search_book.count %> <span class="text-muted small font-weight-normal">posts found</span>
+    <% end %>
+  </div>
+</div>

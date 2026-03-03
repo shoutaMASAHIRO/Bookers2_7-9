@@ -21,6 +21,7 @@
         <% @books.each do |book| %>
           <li class="list-group-item">
             <strong><%= link_to book.title, book_path(book) %></strong><br>
+            <small>カテゴリ: <%= link_to book.category, search_path(word: book.category, range: "Book", search_method: "perfect") %></small><br>
             <small>投稿者: <%= link_to book.user.name, user_path(book.user) %></small>
           </li>
         <% end %>

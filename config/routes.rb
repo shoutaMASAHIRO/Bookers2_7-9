@@ -15,8 +15,17 @@ Rails.application.routes.draw do
     member do
       get :following
       get :followers
+      get :search_posts
     end
   end
 
-  resources :relationships, only: [:create, :destroy]  
+  resources :relationships, only: [:create, :destroy]
+  
+  resources :rooms, only: [:show, :create]
+  resources :messages, only: [:create]
+  resources :groups, only: [:index, :show, :new, :create, :edit, :update] do
+    resource :group_users, only: [:create, :destroy]
+    get "new/event_notice" => "groups#new_event_notice"
+    post "send/event_notice" => "groups#send_event_notice"
+  end
 end

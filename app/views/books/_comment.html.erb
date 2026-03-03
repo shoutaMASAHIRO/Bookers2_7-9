@@ -1,15 +1,22 @@
-<div id="comment-<%= comment.id %>" class="mb-3 p-2 border rounded">
-  <%= link_to user_path(comment.user.id) do %>
-    <%= image_tag comment.user.get_profile_image(100, 100), class: "rounded-circle", size: "50x50" %><br>
-    <strong><%= comment.user.name %></strong>
-  <% end %>
-  <p><%= comment.comment %></p>
-
-  <% if comment.user == current_user %>
-    <%= link_to "Destroy", book_book_comment_path(comment.book, comment),
-                method: :delete,
-                remote: true,
-                data: { confirm: "削除しますか？" },
-                class: "btn btn-sm btn-danger mt-2" %>
-  <% end %>
+<div id="comment-<%= comment.id %>" class="p-3 border-bottom d-flex">
+  <div class="mr-3">
+    <%= link_to user_path(comment.user.id) do %>
+      <%= image_tag comment.user.get_profile_image(40, 40), size: "40x40", class: "rounded-circle border" %>
+    <% end %>
+  </div>
+  <div class="flex-grow-1">
+    <div class="d-flex align-items-center mb-1">
+      <span class="font-weight-bold text-dark mr-2"><%= comment.user.name %></span>
+      <span class="text-muted small">@<%= comment.user.name %> · <%= time_ago_in_words(comment.created_at) %></span>
+    </div>
+    <p class="mb-1 text-dark"><%= comment.comment %></p>
+    
+    <% if comment.user == current_user %>
+      <div class="mt-2">
+        <%= link_to book_book_comment_path(comment.book, comment), method: :delete, remote: true, data: { confirm: "削除しますか？" }, class: "text-danger small" do %>
+          <i class="far fa-trash-alt"></i> Delete
+        <% end %>
+      </div>
+    <% end %>
+  </div>
 </div>

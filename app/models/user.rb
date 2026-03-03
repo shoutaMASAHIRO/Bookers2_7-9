@@ -21,6 +21,12 @@ class User < ApplicationRecord
       dependent: :destroy
   has_many :followers, through: :passive_relationships, source: :follower
 
+  has_many :user_rooms, dependent: :destroy
+  has_many :messages, dependent: :destroy
+  has_many :rooms, through: :user_rooms
+  has_many :group_users, dependent: :destroy
+  has_many :groups, through: :group_users
+
   validates :name, presence: true,length: { minimum: 2 ,maximum: 20},uniqueness: true
   validates :introduction,length: { maximum: 50}
 
@@ -31,7 +37,9 @@ class User < ApplicationRecord
       file_path = Rails.root.join('app/assets/images/no_image.jpg')
       profile_image.attach(io: File.open(file_path), filename: 'default-image.jpg', content_type: 'image/jpeg')
     end
-    profile_image.variant(resize_to_limit: [width, height]).processed
+    # ImageMagickがない場合はvariantが使えないため、一旦オリジナルを返すように変更します
+    # profile_image.variant(resize_to_limit: [width, height]).processed
+    profile_image
   end
 
   # フォローする

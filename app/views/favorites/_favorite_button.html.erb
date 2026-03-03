@@ -6,15 +6,15 @@
                 method: :delete,
                 remote: true do %>
       <span class="text-danger">
-        <i class="fa-solid fa-heart"></i><%= book.favorites.count %>
+        <i class="fas fa-heart"></i> <%= book.favorites.count %>
       </span>
     <% end %>
   <% else %>
     <%= link_to book_favorites_path(book),
                 method: :post,
                 remote: true do %>
-      <span class="text-primary">
-        <i class="fa-regular fa-heart"></i><%= book.favorites.count %>
+      <span class="text-muted">
+        <i class="far fa-heart"></i> <%= book.favorites.count %>
       </span>
     <% end %>
   <% end %>

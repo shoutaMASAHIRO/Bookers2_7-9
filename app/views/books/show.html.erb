@@ -1,56 +1,80 @@
-<% if flash[:success] %>
-  <div class="success">
-    <%= flash[:success] %>
-  </div>
-<% end %>
-
 <div class="container">
   <div class="row">
     <div class="col-md-3">
       <%= render 'book', user: @book.user, book: @Bookshow %>
     </div>
 
-    <div class="col-md-8 offset-md-1">
-      <h1>Book detail</h1>
-
-      <table class="table table-striped">
-        <tr>
-          <td colspan="2">
-            <%= link_to user_path(@book.user.id) do %>
-              <%= image_tag @book.user.get_profile_image(100, 100) %><br>
-              <%= @book.user.name %>
-            <% end %>
-          </td>
-        </tr>
-        <tr>
-          <td>タイトル: <%= link_to @book.title, book_path(@book.id) %></td>
-          <td>本文: <%= @book.body %></td>
-        </tr>
-        <tr>
-          <td>
-            <div id="favorite-button-<%= @book.id %>">
-              <%= render 'favorite_button', book: @book %>
-            </div>
-          </td>
-          <td>コメント数: <%= @book.book_comments.count %></td>
-        </tr>
-        <% if @book.user.id == current_user.id %>
-          <tr>
-            <td><%= link_to "Edit", edit_book_path(@book.id) %></td>
-            <td><%= link_to "Destroy", book_path(@book.id), method: :delete, data: { confirm: "Are you sure?" } %></td>
-          </tr>
+    <div class="col-md-8 offset-md-1 border-left border-right px-0">
+      <div class="d-flex align-items-center p-3 border-bottom">
+        <%= link_to :back, class: "text-dark mr-4" do %>
+          <i class="fas fa-arrow-left"></i>
         <% end %>
-      </table>
+        <h2 class="h5 mb-0 font-weight-bold">Post</h2>
+      </div>
 
-      <div class="mb-4">
+      <div class="p-3 border-bottom">
+        <div class="d-flex align-items-center mb-3">
+          <%= link_to user_path(@book.user.id) do %>
+            <%= image_tag @book.user.get_profile_image(56, 56), size: "56x56", class: "rounded-circle border mr-3" %>
+          <% end %>
+          <div>
+            <div class="font-weight-bold text-dark"><%= @book.user.name %></div>
+            <div class="text-muted small">@<%= @book.user.name %></div>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <h3 class="h4 font-weight-bold border-0 mb-2"><%= @book.title %></h3>
+          <p class="lead" style="font-size: 1.25rem;"><%= @book.body %></p>
+          <% if @book.category.present? %>
+            <span class="text-primary">#<%= link_to @book.category, search_path(word: @book.category, range: "Book", search_method: "perfect") %></span>
+          <% end %>
+        </div>
+
+        <div class="mb-3">
+          <%= render 'star_display', star_count: @book.star, book_id: @book.id %>
+        </div>
+
+        <div class="text-muted small py-3 border-top border-bottom mb-3">
+          <%= @book.created_at.strftime("%I:%M %p · %b %d, %Y") %> · 
+          <strong class="text-dark"><%= @book.view_counts %></strong> <span class="mr-3">Views</span>
+          <strong class="text-dark"><%= @book.favorites.count %></strong> <span>Likes</span>
+        </div>
+
+        <div class="d-flex justify-content-around text-muted py-2 border-bottom mb-4" style="font-size: 1.2rem;">
+          <i class="far fa-comment"></i>
+          <div id="favorite-button-<%= @book.id %>">
+            <%= render 'favorite_button', book: @book %>
+          </div>
+          <i class="far fa-share-square"></i>
+          <% if @book.user.id == current_user.id %>
+            <%= link_to edit_book_path(@book.id), class: "text-muted" do %>
+              <i class="far fa-edit"></i>
+            <% end %>
+            <%= link_to book_path(@book.id), method: :delete, data: { confirm: "Are you sure?" }, class: "text-danger" do %>
+              <i class="far fa-trash-alt"></i>
+            <% end %>
+          <% end %>
+        </div>
+
         <div id="comments">
+          <h4 class="h6 font-weight-bold mb-3">Replies</h4>
           <%= render partial: "books/comment", collection: @book.book_comments, as: :comment %>
         </div>
 
-        <%= form_with(model: [@book, BookComment.new], local: false, data: { turbo: false }, html: { id: "comment_form" }) do |f| %>
-          <%= f.text_area :comment, class: "form-control", rows: 2 %>
-          <%= f.submit "送信", class: "btn btn-primary mt-2" %>
-        <% end %>                 
+        <div class="mt-4 border-top pt-3">
+          <%= form_with(model: [@book, BookComment.new], local: false, data: { turbo: false }, html: { id: "comment_form" }) do |f| %>
+            <div class="d-flex">
+              <%= image_tag current_user.get_profile_image(40, 40), size: "40x40", class: "rounded-circle mr-3" %>
+              <div class="flex-grow-1">
+                <%= f.text_area :comment, class: "form-control border-0 bg-transparent shadow-none px-0", placeholder: "Post your reply", rows: 2, style: "font-size: 1.1rem; resize: none;" %>
+                <div class="text-right border-top mt-2 pt-2">
+                  <%= f.submit "Reply", class: "btn btn-primary btn-sm px-4" %>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
       </div>
     </div>
   </div>
