@@ -12,5 +12,12 @@ class SearchesController < ApplicationController
         @books = Book.search_for(@word, @search_method)
       end
     end
+
+    def category_search
+      @word = params[:word]
+      @books = Book.where("category LIKE ?", "%#{@word}%")
+      @range = "Book"
+      render "search"
+    end
   end
   

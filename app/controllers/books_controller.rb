@@ -5,11 +5,11 @@ class BooksController < ApplicationController
     @from = 6.days.ago.at_beginning_of_day
     
     if params[:latest]
-      @books = Book.all.order(created_at: :desc)
+      @books = Book.includes(:user, :favorites).order(created_at: :desc)
     elsif params[:star_count]
-      @books = Book.all.order(star: :desc)
+      @books = Book.includes(:user, :favorites).order(star: :desc)
     else
-      @books = Book.includes(:favorites).sort_by { |x| x.favorites.where(created_at: @from..@to).size }.reverse
+      @books = Book.includes(:user, :favorites).sort_by { |x| x.favorites.where(created_at: @from..@to).size }.reverse
     end
     
     @user = current_user
@@ -33,7 +33,7 @@ class BooksController < ApplicationController
       else
         @to = Time.current.at_end_of_day
         @from = 6.days.ago.at_beginning_of_day
-        @books = Book.includes(:favorites).sort_by { |x| x.favorites.where(created_at: @from..@to).size }.reverse
+        @books = Book.includes(:user, :favorites).sort_by { |x| x.favorites.where(created_at: @from..@to).size }.reverse
         @user = User.find(current_user.id)
         render :index
       end
